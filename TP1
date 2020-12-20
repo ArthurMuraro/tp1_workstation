@@ -1,0 +1,130 @@
+#!/bin/bash
+
+echo infos systemes :
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo host OS :
+echo nom de la machine :
+hostname
+echo
+
+echo nom de l OS et version :
+source /etc/os-release && echo $NAME && uname -r
+echo
+
+echo architecture processeur :
+uname -i
+echo
+
+echo ram :
+free -mh | grep Mem | awk -F' ' '{print$ 2}'
+####
+echo
+
+echo 
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo devices :
+echo cpu :
+cat /proc/cpuinfo | grep name | sed -n '1p'
+cat /proc/cpuinfo | grep family | sed -n '1p'
+echo
+
+echo gpu :
+lspci | egrep "3D|VGA|DVI|HDMI"
+echo
+
+echo trackpad :
+echo "pour ce qui est du trackpad je n'ai pas trouvé le moyen de l'afficher sans passer par un packag à installer"
+echo
+
+echo disques durs :
+df -ah | egrep "/dev/sda|/dev/sdb"
+echo
+
+echo partitions :
+df -ah
+echo
+
+echo 
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo Users :
+echo listing des utilisateurs :
+cat /etc/passwd | awk -F: '{print $ 1}'
+echo
+
+echo "SuperUtilisateur:" $(cat /etc/passwd | grep :root:)
+echo
+
+echo 
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo Processus :
+echo listing des processus :
+ps -aux
+echo 
+
+echo listing des processus de root :
+ps -u root
+echo
+
+echo explication des processus :
+echo systemd :
+echo -e "le processus systemd qui a toujours pour PID 1, est le premier processus executé par le Noyau, il a pour rôle de lancer tout les processus indispensables \nau bon fonctionnement de la machine par l utilisateur, il a aussi pour rôle de redémarrer et éteindre la machine correctement."
+echo
+
+echo Xorg :
+echo "le processus Xorg permet de gerer le service de l'affichage graphique de la Machine"
+echo
+
+echo cron :
+echo -e "le processus cron est lié au fichier crontab de chaques utilisateurs, il gère les taches devants être executés à des moments précis en se refferant au fichier \ncrontab, ces tâches sont executés avec les droits root, c'est un très bon outil pour l'automatisation de tâches ou l'administration du système"
+echo
+
+echo -e "les processus terminants par \"d\" :"
+echo -e "les processus terminants par cette lettre sont des \"deamon\", c'est à dire des processus souvent lancés au démarrage de la machine en fond de tache, et \nqui attendent d'être appelés. on y trouve beaucoup de processus souvent lancés par le systemd. on y trouve les processus : \ndhcpd, ftpd, sendmaild, syslogd"
+echo
+
+echo #### :
+####
+echo
+
+echo 
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo Network :
+echo cartes réseaux :
+ip a
+echo
+
+echo les cartes lo sont appelées loopback, dit aussi localhost, elles servent au diagnostique du protocol TCP/IP.
+echo les cartes qui commencent souvent par E et plus souvent par Ether, sont des cartes Ethernet
+echo les cartes wlan sont des cartes wi-fi
+echo
+
+echo listing des 10 premiers ports :
+ss -tnapu | sed -n '1,10p'
+echo
+
+echo
+echo --------------------------------------------------------------------------------------------------------------------------------------------------------------
+echo Gestion de softs :
+echo les interets d un gestionnaire de paquet :
+echo "les gestionnaires de paquet présentent un grand nombre d'avantages, le premier est la centralisation de tout les paquets, en effet les gestionnaires de paquets vont"
+echo "télécharger directement sur des dépots (tous officiels sauf modification des dépots par l'utilisateur) ainsi, plus besoin de télécharger des logiciels sur des sites douteux"
+echo "et plus besoin d'installer manuellement tout les logiciels, l'autre avantage, ce sont les dépendances, en effet, certains paquets vont avoir besoin de dépendances, cela permet"
+echo "au gestionnaire de ne pas télécharger toutes les bibliothèques utiles si elles sont déjà sur la machine et sans doute le plus gros avantage est la sécurité, en téléchageant "
+echo "directement sur des dépots sécurisés de manière automatisé aucun risque de télécharger un programme maveillant depuis ces dépot."
+echo
+
+echo listing des paquets installé :
+if [ $(apt-cache pkgnames 2> /dev/null) = "" ]
+then
+    echo "votre gestionnaire de paquets n'est aptitude"
+else
+    echo $(apt-cache pkgnames 2> /dev/null)
+fi
+
+echo listing des dépot :
+if [ $(cat /etc/apt/sources.list  2> /dev/null | grep deb-src | cut -d' ' -f3) = "" ]
+then
+    echo "votre gestionnaire de paquet n'est pas aptitude"
+else
+    echo $(cat /etc/apt/sources.list | grep deb-src | cut -d' ' -f3)
+fi

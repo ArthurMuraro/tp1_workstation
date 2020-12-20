@@ -1,0 +1,33 @@
+#!/bin/bash
+# Arthur Muraro
+# 19/10/2020
+
+
+voici ci-dessous la démarche effectué pour la partie serveur :
+    sudo apt install nfs-kernel-server
+    sudo mkdir /nfsdir
+    man exports
+    echo "/nfsdir 192.168.120.0(rw,all_squash,anonuid=1500,anongid=1501)" >> /etc/exports
+    sudo ufw allow from 192.168.120.0/24 to any port nfs
+    ajout/modification dans /etc/default/nfs-kernel-server :
+        RPCMOUNTDOPTS="--port 40000"
+    sudo ufw allow in from $(ip address show dev vmnet10 | grep 'inet ' | cut -d' ' -f6) to any port 111 
+    sudo ufw allow in from $(ip address show dev vmnet10 | grep 'inet ' | cut -d' ' -f6) to any port 2049
+    sudo ufw allow in from $(ip address show dev vmnet10 | grep 'inet ' | cut -d' ' -f6) to any port 40000
+
+
+voici ci-dessous la démarche effectué pour la partie client :
+    yum install nfs-utils
+    sudo mkdir /sharenfs
+    sudo mount -t nfs 192.168.120.51:/nfsdir /sharenfs
+
+malheuresement ça ne marche pas, j'ai tout refait plusieurs fois en utilisant d'autres méthodes mais cela n'a pas marché.
+
+en attendant, pour te montrer que ce genre de connaissances est aquis je te propose de te connecter à mon serveur FTP via un client GUI ( j'ai désactivé les connection CLI ) avec ces sparamètres :
+
+hote : rathaneegha.space
+user : leo
+mdp : L3oGo2frwA
+port : pas la peine de préciser
+
+C'est un serveur que j'ai monté sur une raspberry pi (os raspbian) avec le service vsftpd. Si tu as des questions sur ma démarche n'hésites pas à me mp discord, il me sert de cloud personnel.

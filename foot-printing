@@ -1,0 +1,43 @@
+#!/bin/bash
+# Arthur Muraro
+# 19/10/2020
+
+echo Get average ping latency to 8.8.8.8 server...
+echo
+echo ----------------------------------------
+echo $(hostname) footprinting report :
+echo ----------------------------------------
+echo
+echo OS : $(source /etc/os-release && echo $NAME)
+echo Linux kernel : $(uname -r)
+## check if the OS is up to date
+ActualKernel=$(hostnamectl | grep Kernel | awk -F "Linux " '{print $ 2}')
+Releasedkernel=$(uname -r)
+if [ $ActualKernel = $Releasedkernel ]
+then
+    echo Is OS up-to-date : True
+else
+    echo Is OS up-to-date : False
+fi 
+echo Up since : $(uptime -s)
+echo
+value=$(expr 1)
+if_name=$(ip a | grep $value: | cut -d' ' -f2 | awk -F : '{print $ 1}')
+## if the interface selected is the loopback, then the program will select another interface
+if [ $if_name = "lo" ]
+then
+	value=$(expr $value + 1)
+    if_name=$(ip a | grep $value: | cut -d' ' -f$value | awk -F : '{print $ 1}')
+fi
+echo Interface $if_name : $(ip address show dev $if_name | grep 'inet ' | cut -d' ' -f6)		
+echo   - 8.8.8.8 average ping time : $(ping -c4 8.8.8.8 | grep min/avg | cut -d'/' -f5)ms
+echo
+echo Ram
+echo -e "\tUsed :" $(free -mh | grep Mem | cut -d' ' -f18)
+echo -e "\tFree :" $(free -mh | grep Mem | cut -d' ' -f25)
+echo
+echo Disk
+echo -e "\tUsed :" $(df -ha | grep sda | sed -n '1p' | awk -F' ' '{print $ 3}')
+echo -e "\tFree :" $(df -ha | grep sda | sed -n '1p' | awk -F' ' '{print $ 4}')
+echo
+echo Users list : $(awk -F : '{print $ 1}' /etc/passwd)
